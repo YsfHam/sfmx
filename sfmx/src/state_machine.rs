@@ -3,17 +3,20 @@
 use std::collections::{VecDeque, vec_deque::IterMut};
 use crate::application::AppSignal;
 use crate::sfml_export::*;
+use crate::assets_manager::AssetsManager;
 
 pub struct StateData<T> {
     pub data: T,
     pub delta_time: f32,
+    pub assets_manager: AssetsManager
 }
 
 impl<T> StateData<T> {
     pub(crate) fn new(data: T) -> StateData<T> {
         Self {
             data,
-            delta_time: 0.0
+            delta_time: 0.0,
+            assets_manager: AssetsManager::new()
         }
     }
 }

@@ -15,4 +15,5 @@ For a game you could have multiple states:
 - Game over state
 - Etc.
 
-The main.rs file shows a usage example.
+The sandbox project is used for testing and debugging features.
+Some projects to illustrate the usage of this framework will be added as the developement goes.

@@ -1,4 +1,6 @@
 /target
 /Cargo.lock
 /.cargo
+/sfmx/.cargo
 .DS_Store
+/sfml_lib

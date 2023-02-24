@@ -47,6 +47,7 @@ struct Player {
     position: Vector2f,
     velocity: Vector2f,
     size: Vector2f,
+    sprite: RcSprite
 }
 
 impl Player {
@@ -54,6 +55,7 @@ impl Player {
         Self {
             size: Vector2f::new(50.0, 50.0),
             velocity: Vector2f::new(100.0, 100.0),
+            sprite: RcSprite::new(),
             ..Default::default()
         }
     }
@@ -62,25 +64,24 @@ impl Player {
         let vel = Vector2f::new(self.velocity.x * dir.x, self.velocity.y * dir.y);
         self.position += vel * dt;
     }
-    
 
-    fn to_sprite<'a>(&self, texture: &'a Texture) -> Sprite<'a> {
-
-        let mut sprite = Sprite::new();
-        sprite.set_position(self.position);
-        sprite.set_scale((
+    fn set_texture(&mut self, texture: &RcTexture) {
+        self.sprite.set_texture(texture, true);
+        self.sprite.set_position(self.position);
+        self.sprite.set_scale((
             self.size.x / texture.size().x as f32,
             self.size.y / texture.size().y as f32
         ));
-        sprite.set_texture(texture, true);
+    }
 
-        sprite
+    fn get_sprite(&mut self, texture: &RcTexture) -> &RcSprite {
+        self.set_texture(texture);
+        &self.sprite
     }
 }
 
 struct TestState {
     player: Option<Player>,
-    texture: Option<SfBox<Texture>>,
     camera: SfBox<View>
 }
 
@@ -88,8 +89,7 @@ impl TestState {
     fn new(window_size: Vector2f) -> Self {
         Self {
             player: None,
-            camera: View::new(window_size / 2.0, window_size),
-            texture: None
+            camera: View::new(window_size / 2.0, window_size)
         }
     }
 }
@@ -99,14 +99,13 @@ type Data = ();
 impl State<Data> for TestState {
 
 
-    fn on_init(&mut self, _: &mut StateData<Data>) {
-        self.texture = match Texture::from_file("assets/awesomeface.png") {
-            Ok(texture) => Some(texture),
-            Err(e) => panic!("{}", e)
-        };
+    fn on_init(&mut self, state_data: &mut StateData<Data>) {
 
-        self.player = Some(Player::new());
-        
+        state_data.assets_manager
+            .load_textures("awesome_face", "assets/awesomeface.png")
+            .unwrap();
+
+        self.player = Some(Player::new());        
     }
 
     fn on_event(&mut self, event: Event, _: &mut StateData<Data>) -> Transition<Data> {
@@ -148,7 +147,7 @@ impl State<Data> for TestState {
         Transition::None
     }
 
-    fn on_render(&mut self, _: &mut StateData<Data>, window: &mut RenderWindow) {
+    fn on_render(&mut self, _state_data: &mut StateData<Data>, window: &mut RenderWindow) {
 
         window.clear(Color::BLACK);
 
@@ -156,7 +155,11 @@ impl State<Data> for TestState {
 
         draw_map(MAP, window);
 
-        window.draw(&self.player.as_ref().unwrap().to_sprite(&self.texture.as_ref().unwrap()));
+        let texture = _state_data.assets_manager
+            .get_texture("awesome_face")
+            .unwrap();
+
+        window.draw(self.player.as_mut().unwrap().get_sprite(&texture));
 
         window.display();
     }
