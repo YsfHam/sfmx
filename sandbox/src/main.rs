@@ -1,95 +1,91 @@
 use sfmx::prelude::*;
 
-const MAP:&[&'static str] = &[
-    "##################",
-    "#    -      -    #",
-    "#    -      -    #",
-    "#    -      -    #",
-    "#    -      -    #",
-    "##################",
-];
-
-fn draw_map(map: &[&'static str], target: &mut impl RenderTarget) {
-
-    let map_size = Vector2f::new(map[0].len() as f32, map.len() as f32);
-    let target_size = target.size().as_other::<f32>();
-    let quad_size = Vector2f::new(target_size.x / map_size.x, target_size.y / map_size.y);
-
-    
-    if Key::K.is_pressed() {
-        println!("Window size {:?}", target_size);
-        println!("Quad size {:?}", quad_size);
-        println!("map_size {:?}", map_size);
-    }
-
-    let mut bloc = RectangleShape::new();
-    bloc.set_size(quad_size);
-
-    for y in 0..map_size.y as usize {
-        for x in 0..map_size.x as usize {
-            match map[y].as_bytes()[x] as char {
-                '#' => {
-                    bloc.set_fill_color(Color::RED);
-                }
-                '-' => {
-                    bloc.set_fill_color(Color::BLUE);
-                }
-                _ => continue
-            }
-            bloc.set_position((x as f32 * quad_size.x, y as f32 * quad_size.y));
-            target.draw(&bloc);
-        }
-    }
-}
-
 #[derive(Default)]
 struct Player {
-    position: Vector2f,
     velocity: Vector2f,
-    size: Vector2f,
     sprite: RcSprite
 }
 
 impl Player {
     fn new() -> Self {
+
         Self {
-            size: Vector2f::new(50.0, 50.0),
             velocity: Vector2f::new(100.0, 100.0),
             sprite: RcSprite::new(),
             ..Default::default()
         }
     }
 
-    fn update_position(&mut self, dt: f32, dir: Vector2f) {
-        let vel = Vector2f::new(self.velocity.x * dir.x, self.velocity.y * dir.y);
-        self.position += vel * dt;
-    }
-
     fn set_texture(&mut self, texture: &RcTexture) {
         self.sprite.set_texture(texture, true);
-        self.sprite.set_position(self.position);
-        self.sprite.set_scale((
-            self.size.x / texture.size().x as f32,
-            self.size.y / texture.size().y as f32
+        let texture_size = texture.size().as_other::<f32>();
+        let sprite_size = Vector2f::new(50.0, 50.0);
+        self.sprite.scale((
+            sprite_size.x / texture_size.x,
+            sprite_size.y / texture_size.y
         ));
+
     }
 
-    fn get_sprite(&mut self, texture: &RcTexture) -> &RcSprite {
-        self.set_texture(texture);
+    fn update_position(&mut self, dt: f32, dir: Vector2f) {
+        let vel = Vector2f::new(self.velocity.x * dir.x, self.velocity.y * dir.y);
+        self.sprite.move_(vel * dt);
+    }
+
+    fn get_sprite(&self) -> &RcSprite {
         &self.sprite
+    }
+}
+
+struct ProgressBar {
+    bar_sprite: RcSprite,
+    bar_size: Vector2f
+}
+
+impl ProgressBar {
+    fn new(texture: &RcTexture, bar_size: impl Into<Vector2f>, color: Color) -> Self {
+        let mut sprite = RcSprite::new();
+        sprite.set_texture(texture, true);
+        sprite.set_color(color);
+
+        let texture_size = texture.size().as_other::<f32>();
+        let bar_size = bar_size.into();
+        sprite.scale((
+            0.0,
+            bar_size.y / texture_size.y
+        ));
+
+        Self {
+            bar_sprite: sprite,
+            bar_size
+        }
+    }
+
+    fn set_position(&mut self, pos: impl Into<Vector2f>) {
+        self.bar_sprite.set_position(pos);
+    }
+
+    fn set_progress(&mut self, progress: f32) {
+        let progress = progress.clamp(0.0, 100.0);
+        let new_width = self.bar_size.x * progress / 100.0;
+        let current_scale = self.bar_sprite.get_scale();
+        let texture_width = self.bar_sprite.texture().unwrap().size().x as f32;
+        self.bar_sprite.set_scale((new_width / texture_width, current_scale.y));
     }
 }
 
 struct TestState {
     player: Option<Player>,
-    camera: SfBox<View>
+    camera: SfBox<View>,
+    progress_bar: Option<ProgressBar>,
 }
 
 impl TestState {
     fn new(window_size: Vector2f) -> Self {
         Self {
             player: None,
-            camera: View::new(window_size / 2.0, window_size)
+            camera: View::new(window_size / 2.0, window_size),
+            progress_bar: None,
         }
     }
 }
@@ -97,15 +93,30 @@ impl TestState {
 type Data = ();
 
 impl State<Data> for TestState {
-
-
     fn on_init(&mut self, state_data: &mut StateData<Data>) {
 
-        state_data.assets_manager
-            .load_textures("awesome_face", "assets/awesomeface.png")
-            .unwrap();
+        state_data.assets_manager.
+        load_asset(AssetType::Texture, "awesome_face".to_string(), "assets/awesomeface.png");
+        let mut player = Player::new();
+        player.set_texture(state_data.assets_manager.get_asset(AssetType::Texture, "awesome_face".to_string()).unwrap());
+        self.player = Some(player);
 
-        self.player = Some(Player::new());        
+        state_data.assets_manager.
+        load_asset(AssetType::Texture, "white_texture".to_string(), "assets/white_texture.png");
+
+        let white_texture = state_data.assets_manager.get_asset(AssetType::Texture, "white_texture".to_string()).unwrap();
+        let x = state_data.assets_manager.get_asset::<Font, _>(AssetType::Font, "font".to_string()).unwrap();
+
+        let mut progress_bar = ProgressBar::new(&white_texture, (400.0, 10.0), Color::RED);
+        progress_bar.set_position((50.0, 300.0));
+        self.progress_bar = Some(progress_bar);
+
+
+        for i in 0..1000 {
+            state_data.assets_manager.
+            load_asset_buffered(AssetType::Texture, format!("test_loading{}", i), "assets/awesomeface.png")
+        }
+
     }
 
     fn on_event(&mut self, event: Event, _: &mut StateData<Data>) -> Transition<Data> {
@@ -120,8 +131,10 @@ impl State<Data> for TestState {
     }
 
     fn on_update(&mut self, state_data: &mut StateData<Data>) -> Transition<Data> {
-        let mut dir = Vector2f::default();
 
+        state_data.assets_manager.launch_loadings();
+
+        let mut dir = Vector2f::default();
         if Key::Z.is_pressed() {
             dir.y = -1.0;
         }
@@ -142,7 +155,12 @@ impl State<Data> for TestState {
         }
         self.player.as_mut().unwrap().update_position(state_data.delta_time, dir);
 
-        
+        // if Key::P.is_pressed() {
+        //     self.progress += 10.0 * state_data.delta_time;
+        //     
+        // }
+
+        self.progress_bar.as_mut().unwrap().set_progress(state_data.assets_manager.loading_percentage());
 
         Transition::None
     }
@@ -153,14 +171,10 @@ impl State<Data> for TestState {
 
         window.set_view(&self.camera);
 
-        draw_map(MAP, window);
-
-        let texture = _state_data.assets_manager
-            .get_texture("awesome_face")
-            .unwrap();
-
-        window.draw(self.player.as_mut().unwrap().get_sprite(&texture));
-
+        //draw_map(MAP, window);
+        
+        window.draw(self.player.as_mut().unwrap().get_sprite());
+        window.draw(&self.progress_bar.as_ref().unwrap().bar_sprite);
         window.display();
     }
 

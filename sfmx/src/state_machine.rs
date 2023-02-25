@@ -3,12 +3,12 @@
 use std::collections::{VecDeque, vec_deque::IterMut};
 use crate::application::AppSignal;
 use crate::sfml_export::*;
-use crate::assets_manager::AssetsManager;
+use crate::assets_manager::{DefaultAssetsManager, AssetsManager};
 
 pub struct StateData<T> {
     pub data: T,
     pub delta_time: f32,
-    pub assets_manager: AssetsManager
+    pub assets_manager: DefaultAssetsManager
 }
 
 impl<T> StateData<T> {
@@ -16,7 +16,7 @@ impl<T> StateData<T> {
         Self {
             data,
             delta_time: 0.0,
-            assets_manager: AssetsManager::new()
+            assets_manager: AssetsManager::default()
         }
     }
 }
