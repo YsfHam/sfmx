@@ -87,7 +87,7 @@ impl<Data> StateMachine<Data> {
             states_data
         };
 
-        res.add_state(initial_state);
+        res.add_state(initial_state, false);
 
         res
 
@@ -118,16 +118,16 @@ impl<Data> StateMachine<Data> {
     fn transition(&mut self, trans: Transition<Data>) -> AppSignal {
         match trans {
             Transition::Add(new_state) => {
-                self.add_state(new_state);
+                self.add_state(new_state, true);
                 AppSignal::None
             },
             Transition::Remove => {
-                self.remove_state();
+                self.remove_state(true);
                 AppSignal::None
             },
             Transition::Replace(new_state) => {
-                self.remove_state();
-                self.add_state(new_state);
+                self.remove_state(false);
+                self.add_state(new_state, false);
                 AppSignal::None
             },
             Transition::None => AppSignal::None,
@@ -135,8 +135,8 @@ impl<Data> StateMachine<Data> {
         }
     }
 
-    fn add_state(&mut self, new_state: StateRef<Data>) {
-        if self.states_stack.has_state() {
+    fn add_state(&mut self, new_state: StateRef<Data>, pause: bool) {
+        if self.states_stack.has_state() && pause {
             self.states_stack.top().on_pause(&mut self.states_data);
         }
 
@@ -146,12 +146,12 @@ impl<Data> StateMachine<Data> {
         top_state.on_init(&mut self.states_data);
     }
 
-    fn remove_state(&mut self) {
+    fn remove_state(&mut self, resume: bool) {
         let mut removed_state = self.states_stack.pop();
 
         removed_state.on_end(&mut self.states_data);
 
-        if self.states_stack.has_state() {
+        if self.states_stack.has_state() && resume {
             self.states_stack.top().on_resume(&mut self.states_data);
         }
     }
