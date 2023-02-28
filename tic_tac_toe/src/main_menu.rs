@@ -127,12 +127,13 @@ impl State<GameData> for MainMenuState {
         Transition::None
     }
 
-    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut RenderWindow) {
+    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut dyn RenderTarget) -> bool {
         window.clear(state_data.data.clear_color);
         window.draw(&self.title_sprite);
         if self.move_animation.as_ref().unwrap().has_finished() {
             self.buttons.draw(window);
         }
-        window.display();
+
+        true
     }
 }

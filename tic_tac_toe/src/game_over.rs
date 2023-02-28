@@ -67,7 +67,7 @@ impl State<GameData> for GameOverState {
         Transition::None
     }
 
-    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut RenderWindow) {
+    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut dyn RenderTarget) -> bool {
         window.clear(state_data.data.clear_color);
         let font: &SfBox<Font> = state_data.assets_manager.get_asset(AssetType::Font, "font".to_string()).unwrap();
         let mut text_ui = Text::new(&self.text, font, 50);
@@ -79,7 +79,6 @@ impl State<GameData> for GameOverState {
         window.draw(&text_ui);
 
         self.buttons.draw(window);
-
-        window.display();
+        true
     }
 }

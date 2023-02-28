@@ -1,6 +1,6 @@
 use crate::sfml_export::*;
-use crate::state_machine::{StateMachine, StateData, State};
-use crate::timer::Timer;
+use super::state_machine::{StateMachine, StateData, State};
+use super::timer::Timer;
 
 pub(crate) enum AppSignal {
     Quit,
@@ -121,7 +121,9 @@ impl<Data> Application<Data> {
     }
 
     fn render(&mut self) {
-        self.state_machine.on_render(&mut self.window);
+       if self.state_machine.on_render(&mut self.window) {
+            self.window.display();
+       }
     }
 
     fn handle_signal(&mut self, signal: AppSignal) {

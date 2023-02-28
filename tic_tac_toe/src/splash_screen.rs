@@ -70,10 +70,10 @@ impl State<GameData> for SplashScreenState {
         Transition::None
     }
 
-    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut RenderWindow) {
+    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut dyn RenderTarget) -> bool {
         window.clear(state_data.data.clear_color);
         window.draw(&self.title_sprite);
-        window.display();
+        true
     }
 }
 

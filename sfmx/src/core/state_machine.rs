@@ -1,9 +1,9 @@
 #![allow(unused_variables)]
 
 use std::collections::{VecDeque, vec_deque::IterMut};
-use crate::application::AppSignal;
+use super::application::AppSignal;
 use crate::sfml_export::*;
-use crate::assets_manager::{DefaultAssetsManager, AssetsManager};
+use super::assets_manager::{DefaultAssetsManager, AssetsManager};
 
 pub struct StateData<T> {
     pub data: T,
@@ -39,7 +39,7 @@ pub trait State<Data> {
     fn on_update(&mut self, state_data: &mut StateData<Data>) -> Transition<Data> { Transition::None }
     fn on_pause(&mut self, state_data: &mut StateData<Data>) {}
     fn on_resume(&mut self, state_data: &mut StateData<Data>) {}
-    fn on_render(&mut self, state_data: &mut StateData<Data>, window: &mut RenderWindow) {}
+    fn on_render(&mut self, state_data: &mut StateData<Data>, window: &mut dyn RenderTarget) -> bool {false}
 }
 
 
@@ -105,8 +105,8 @@ impl<Data> StateMachine<Data> {
         self.transition(trans)
     }
 
-    pub(crate) fn on_render(&mut self, window: &mut RenderWindow) {
-        self.states_stack.top().on_render(&mut self.states_data, window);
+    pub(crate) fn on_render(&mut self, window: &mut dyn RenderTarget) -> bool {
+        self.states_stack.top().on_render(&mut self.states_data, window)
     }
 
     pub(crate) fn terminate(&mut self) {

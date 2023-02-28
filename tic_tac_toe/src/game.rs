@@ -125,13 +125,14 @@ impl State<GameData> for GameState {
         }
     }
 
-    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut RenderWindow) {
+    fn on_render(&mut self, state_data: &mut StateData<GameData>, window: &mut dyn RenderTarget) -> bool {
         if !self.grid.as_ref().unwrap().can_draw_sprites() {
-            return
+            return false;
         }
         window.clear(state_data.data.clear_color);
         self.grid.as_mut().unwrap().draw(window);
         self.buttons.draw(window);
-        window.display();
+
+        return true;
     }
 }

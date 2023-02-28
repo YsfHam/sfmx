@@ -47,7 +47,7 @@ impl Button {
         self.is_clicked = false;
     }
 
-    pub fn draw(&self, target: &mut impl RenderTarget) {
+    pub fn draw(&self, target: &mut dyn RenderTarget) {
         target.draw(&self.sprite);
     }
 
@@ -91,7 +91,7 @@ impl ButtonsGroup {
         false
     }
 
-    pub fn draw(&self, target: &mut impl RenderTarget) {
+    pub fn draw(&self, target: &mut dyn RenderTarget) {
         for (_, btn) in self.buttons.iter() {
             btn.draw(target);
         }

@@ -316,7 +316,7 @@ impl DrawableGrid {
         self.put_symbol(grid_pos.x, grid_pos.y)
     }
 
-    pub fn draw(&mut self, target: &mut impl RenderTarget) {
+    pub fn draw(&mut self, target: &mut dyn RenderTarget) {
         let half_offset = self.cells_offset / 2.0;
 
         let cell_size = self.dimensions / self.grid.grid_size as f32 - Vector2::new(self.cells_offset , self.cells_offset );

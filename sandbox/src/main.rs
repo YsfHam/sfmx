@@ -165,7 +165,7 @@ impl State<Data> for TestState {
         Transition::None
     }
 
-    fn on_render(&mut self, _state_data: &mut StateData<Data>, window: &mut RenderWindow) {
+    fn on_render(&mut self, _state_data: &mut StateData<Data>, window: &mut dyn RenderTarget) -> bool {
 
         window.clear(Color::BLACK);
 
@@ -175,8 +175,9 @@ impl State<Data> for TestState {
         
         window.draw(self.player.as_mut().unwrap().get_sprite());
         window.draw(&self.progress_bar.as_ref().unwrap().bar_sprite);
-        window.display();
+        true
     }
+
 
 }
  
