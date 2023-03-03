@@ -3,7 +3,7 @@ mod splash_screen;
 mod game;
 mod grid;
 mod main_menu;
-mod gui;
+mod mygui;
 mod player;
 mod game_over;
 mod game_menu;

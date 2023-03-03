@@ -2,7 +2,7 @@ use sfmx::prelude::*;
 
 use crate::GameData;
 use crate::game_menu::GameMenuState;
-use crate::gui::{Button, ButtonsGroup};
+use crate::mygui::{Button, ButtonsGroup};
 
 struct MoveToAnimation {
     initial_position: Vector2f,

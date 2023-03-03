@@ -1,7 +1,7 @@
 use sfmx::prelude::*;
 use crate::GameData;
 use crate::game::{GameState, GridData};
-use crate::gui::{Button, ButtonsGroup};
+use crate::mygui::{Button, ButtonsGroup};
 use crate::player::{PlayerType, DumpPlayer, HumanPlayer, Player};
 pub struct GameMenuState {
     grid_data: GridData,

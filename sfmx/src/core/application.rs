@@ -12,7 +12,8 @@ pub struct AppData {
     pub title: &'static str,
     pub win_style: Style,
     pub context_settings: ContextSettings,
-    pub frame_rate: u32
+    pub frame_rate: u32,
+    pub enable_vsync: bool
 }
 
 impl Default for AppData {
@@ -25,7 +26,8 @@ impl Default for AppData {
             title: "new Application",
             win_style: Style::DEFAULT,
             context_settings,
-            frame_rate: 0
+            frame_rate: 0,
+            enable_vsync: true
         }
     }
 }
@@ -60,9 +62,11 @@ impl<Data, S: State<Data> + 'static> AppBuilder<Data, S> {
             app_data.win_style,
             &app_data.context_settings
         );
-
         window.set_framerate_limit(app_data.frame_rate);
-        let states_data = self.states_data.expect("No data provided for the states");
+        window.set_vertical_sync_enabled(app_data.enable_vsync);
+
+        let mut states_data = self.states_data.expect("No data provided for the states");
+        states_data.render_target_size = app_data.win_size;
 
         Application {
             window,
@@ -85,6 +89,7 @@ impl<Data> Application<Data> {
     }
 
     pub fn run(&mut self) {
+
         let timer = Timer::new();
 
         let mut current_time = timer.elapsed().as_secs_f32();

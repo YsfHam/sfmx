@@ -3,7 +3,7 @@ use crate::game_over::GameOverState;
 use crate::grid::{DrawableGrid, GameStatus};
 use crate::GameData;
 use crate::player::Player;
-use crate::gui::{Button, ButtonsGroup};
+use crate::mygui::{Button, ButtonsGroup};
 
 enum GamePlayState {
     Playing,

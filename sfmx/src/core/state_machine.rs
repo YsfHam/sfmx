@@ -8,7 +8,8 @@ use super::assets_manager::{DefaultAssetsManager, AssetsManager};
 pub struct StateData<T> {
     pub data: T,
     pub delta_time: f32,
-    pub assets_manager: DefaultAssetsManager
+    pub assets_manager: DefaultAssetsManager,
+    pub render_target_size: (u32, u32)
 }
 
 impl<T> StateData<T> {
@@ -16,7 +17,8 @@ impl<T> StateData<T> {
         Self {
             data,
             delta_time: 0.0,
-            assets_manager: AssetsManager::default()
+            assets_manager: AssetsManager::default(),
+            render_target_size: (0, 0)
         }
     }
 }
@@ -39,7 +41,7 @@ pub trait State<Data> {
     fn on_update(&mut self, state_data: &mut StateData<Data>) -> Transition<Data> { Transition::None }
     fn on_pause(&mut self, state_data: &mut StateData<Data>) {}
     fn on_resume(&mut self, state_data: &mut StateData<Data>) {}
-    fn on_render(&mut self, state_data: &mut StateData<Data>, window: &mut dyn RenderTarget) -> bool {false}
+    fn on_render(&mut self, state_data: &mut StateData<Data>, target: &mut dyn RenderTarget) -> bool {false}
 }
 
 
@@ -105,8 +107,8 @@ impl<Data> StateMachine<Data> {
         self.transition(trans)
     }
 
-    pub(crate) fn on_render(&mut self, window: &mut dyn RenderTarget) -> bool {
-        self.states_stack.top().on_render(&mut self.states_data, window)
+    pub(crate) fn on_render(&mut self, target: &mut dyn RenderTarget) -> bool {
+        self.states_stack.top().on_render(&mut self.states_data, target)
     }
 
     pub(crate) fn terminate(&mut self) {

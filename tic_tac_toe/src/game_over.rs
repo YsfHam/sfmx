@@ -1,12 +1,12 @@
 
 use sfmx::prelude::*;
 use crate::{GameData, grid::GameStatus};
-use crate::gui::*;
+use crate::mygui;
 
 pub struct GameOverState {
     game_status: GameStatus,
     text: String,
-    buttons: ButtonsGroup
+    buttons: mygui::ButtonsGroup
 }
 
 impl GameOverState {
@@ -14,7 +14,7 @@ impl GameOverState {
         Self {
             game_status,
             text: String::from("Game Over\n\n"),
-            buttons: ButtonsGroup::new()
+            buttons: mygui::ButtonsGroup::new()
         }
     }
 }
@@ -34,14 +34,14 @@ impl State<GameData> for GameOverState {
         let buttons_size = Vector2f::new(200.0, 100.0);
         let win_size = Vector2::from(state_data.data.screen_size).as_other::<f32>();
 
-        let mut restart_btn  = Button::new(restart_btn_texture, buttons_size);
+        let mut restart_btn  = mygui::Button::new(restart_btn_texture, buttons_size);
         restart_btn.set_position((
             (win_size.x - buttons_size.x) / 2.0,
             win_size.y * 2.0 / 3.0 - buttons_size.y + 30.0
         ));
         self.buttons.add_button("restart", restart_btn);
 
-        let mut qui_btn = Button::new(quit_btn_texture, buttons_size);
+        let mut qui_btn = mygui::Button::new(quit_btn_texture, buttons_size);
         qui_btn.set_position((
             (win_size.x - buttons_size.x) / 2.0,
             win_size.y * 2.0 / 3.0 + 50.0
