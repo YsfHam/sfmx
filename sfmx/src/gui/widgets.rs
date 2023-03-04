@@ -31,23 +31,25 @@ pub struct Button {
 }
 
 impl Button {
-    pub fn new() -> Self {
-        Self {
-            clicked: false,
-            hovered: false,
-            last_mouse_pos: Vector2f::default(),
+    pub fn new() -> Box<Self> {
+        Box::new(
+            Self {
+                clicked: false,
+                hovered: false,
+                last_mouse_pos: Vector2f::default(),
 
-            position: Vector2f::default(),
-            size: Vector2f::default(),
-            color: Color::WHITE,
+                position: Vector2f::default(),
+                size: Vector2f::default(),
+                color: Color::WHITE,
 
-            text: DynamicText::new(),
+                text: DynamicText::new(),
 
-            offset_from_text: Vector2f::default(),
-        }
+                offset_from_text: Vector2f::default(),
+            }
+        )
     }
 
-    pub fn with_text(text: &str) -> Self {
+    pub fn with_text(text: &str) -> Box<Self> {
         let mut btn = Self::new();
         btn.text.set_string(text);
         btn
@@ -71,6 +73,17 @@ impl Button {
 
     pub fn set_offset_from_text(&mut self, offset_from_text: Vector2f) {
         self.offset_from_text = offset_from_text;
+    }
+
+    fn update_text(&mut self) {
+        let text = &mut self.text;
+        let text_bounds = text.global_bounds();
+        text.set_size(self.size - self.offset_from_text);
+        text.set_position((
+            (self.size.x / 2.0 - text_bounds.width / 2.0),
+            self.size.y / 2.0 - text_bounds.height / 2.0
+        ));
+        text.move_(self.position);
     }
 
 }
@@ -103,28 +116,12 @@ impl Widget for Button {
     fn set_position(&mut self, position: Vector2f) {
         self.position = position;
 
-        let text = &mut self.text;
-        let text_bounds = text.global_bounds();
-        text.set_position((
-            (self.size.x / 2.0 - text_bounds.width / 2.0),
-            self.size.y / 2.0 - text_bounds.height / 2.0
-        ));
-
-        text.move_(self.position);
+        self.update_text();
     }
 
     fn set_size(&mut self, size: Vector2f) {
-        self.size = size.into();
-
-        let text = &mut self.text;
-        text.set_size(self.size - self.offset_from_text);
-        let text_bounds = text.global_bounds();
-        text.set_position((
-            (self.size.x / 2.0 - text_bounds.width / 2.0),
-            self.size.y / 2.0 - text_bounds.height / 2.0
-        ));
-
-        text.move_(self.position);
+        self.size = size;
+        self.update_text();
     }
 
     fn size(&self) -> Vector2f {

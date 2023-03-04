@@ -4,12 +4,14 @@ use std::collections::{VecDeque, vec_deque::IterMut};
 use super::application::AppSignal;
 use crate::sfml_export::*;
 use super::assets_manager::{DefaultAssetsManager, AssetsManager};
+use crate::core::application::CursorSettings;
 
 pub struct StateData<T> {
     pub data: T,
     pub delta_time: f32,
     pub assets_manager: DefaultAssetsManager,
-    pub render_target_size: (u32, u32)
+    pub render_target_size: (u32, u32),
+    pub cursor: Option<CursorSettings>
 }
 
 impl<T> StateData<T> {
@@ -18,7 +20,8 @@ impl<T> StateData<T> {
             data,
             delta_time: 0.0,
             assets_manager: AssetsManager::default(),
-            render_target_size: (0, 0)
+            render_target_size: (0, 0),
+            cursor: None
         }
     }
 }

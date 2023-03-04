@@ -7,6 +7,22 @@ pub(crate) enum AppSignal {
     None
 }
 
+pub struct CursorSettings {
+    pub cursor_type: CursorType,
+    pub is_grabbed: bool,
+    pub is_visible: bool
+}
+
+impl CursorSettings {
+    pub fn default() -> Self {
+        Self {
+            cursor_type: CursorType::Arrow,
+            is_grabbed: false,
+            is_visible: true
+        }
+    }
+}
+
 pub struct AppData {
     pub win_size: (u32, u32),
     pub title: &'static str,
@@ -70,6 +86,7 @@ impl<Data, S: State<Data> + 'static> AppBuilder<Data, S> {
 
         Application {
             window,
+            cursor: None,
             state_machine: StateMachine::new(
                 Box::new(self.initial_state.expect("Initial state is missing")),
                 states_data
@@ -80,6 +97,7 @@ impl<Data, S: State<Data> + 'static> AppBuilder<Data, S> {
 
 pub struct Application<Data> {
     window: RenderWindow,
+    cursor: Option<SfBox<Cursor>>,
     state_machine: StateMachine<Data>
 }
 
@@ -103,6 +121,19 @@ impl<Data> Application<Data> {
             self.update();
 
             self.render();
+
+            if let Some(settings) = &self.state_machine.states_data.cursor {
+                self.cursor = Cursor::from_system(settings.cursor_type);
+                if let Some(cursor) = &self.cursor {
+                    unsafe {
+                        self.window.set_mouse_cursor(cursor);
+                    }
+                }
+                self.window.set_mouse_cursor_grabbed(settings.is_grabbed);
+                self.window.set_mouse_cursor_visible(settings.is_visible);
+            }
+            self.state_machine.states_data.cursor = None;
+
         }
 
         self.cleanup();

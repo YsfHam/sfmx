@@ -265,7 +265,7 @@ fn gen_glyphs_vertices(dynamic_text: &DynamicText) -> Vec<Vertex>{
 
 
         pos.x += transform.position.x - transform.origin.x;
-        //pos.y += transform.position.y - transform.origin.y;
+        pos.y += transform.position.y - transform.origin.y;
         
         let mut glyph_trans = Transform::default();
         glyph_trans.translate(pos.x, pos.y);
