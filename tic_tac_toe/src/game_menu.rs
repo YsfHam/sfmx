@@ -1,8 +1,9 @@
 use sfmx::prelude::*;
 use crate::GameData;
 use crate::game::{GameState, GridData};
+use crate::grid::Symbol;
 use crate::mygui::{Button, ButtonsGroup};
-use crate::player::{PlayerType, DumpPlayer, HumanPlayer, Player};
+use crate::player::{PlayerType, HumanPlayer, Player, MiniMaxAI};
 pub struct GameMenuState {
     grid_data: GridData,
     sym_occ_win_range: (u32, u32),
@@ -20,7 +21,7 @@ impl GameMenuState {
             },
             sym_occ_win_range: (3, 7),
             buttons_group: ButtonsGroup::new(),
-            player_types: [PlayerType::Human, PlayerType::Human],
+            player_types: [PlayerType::Human, PlayerType::AI],
             player_choice_bounds: [FloatRect::default(); 2]
 
         }
@@ -143,10 +144,12 @@ impl State<GameData> for GameMenuState {
 
         if self.buttons_group.get_button("start_btn").is_clicked() {
             let mut players = self.player_types.iter().map::<Box<dyn Player>, _>(|v| match v {
-                PlayerType::AI => Box::new(DumpPlayer::new()),
+                PlayerType::AI => Box::new(MiniMaxAI::new()),
                 PlayerType::Human => Box::new(HumanPlayer::new()),
             });
-            let players = [players.next().unwrap(), players.next().unwrap()];
+            let mut players = [players.next().unwrap(), players.next().unwrap()];
+            players[0].set_symbol(Symbol::X);
+            players[1].set_symbol(Symbol::O);
             return Transition::Add(Box::new(GameState::new(self.grid_data, players)));
         }
 

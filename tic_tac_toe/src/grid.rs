@@ -59,7 +59,7 @@ impl Grid {
         let mut winning_indices = Vec::with_capacity(self.grid_size);
 
         let start = x as i32 - self.sym_occs_win as i32 + 1;
-        for i in 0..self.grid_size {
+        for i in 0..self.sym_occs_win {
             let start = start + i as i32;
             let end = x as i32 + i as i32 + 1;
             winning_indices.clear();
@@ -81,7 +81,7 @@ impl Grid {
         let mut winning_indices = Vec::with_capacity(self.grid_size);
 
         let start = y as i32 - self.sym_occs_win as i32 + 1;
-        for i in 0..self.grid_size {
+        for i in 0..self.sym_occs_win {
             let start = start + i as i32;
             let end = y as i32 + i as i32 + 1;
             winning_indices.clear();
@@ -104,11 +104,11 @@ impl Grid {
 
         let startx = x as i32 - self.sym_occs_win as i32 + 1;
         let starty = y as i32 - self.sym_occs_win as i32 + 1;
-        for i in 0..self.grid_size {
+        for i in 0..self.sym_occs_win {
             let startx = startx + i as i32;
             let starty = starty + i as i32;
             winning_indices.clear();
-            for j in 0..self.grid_size {
+            for j in 0..self.sym_occs_win {
                 let tx = startx + j as i32;
                 let ty = starty + j as i32;
                 if tx >= 0 && ty >= 0 && self.get_symbol(tx as usize, ty as usize) == self.get_symbol(x, y) {
@@ -130,11 +130,11 @@ impl Grid {
 
         let startx = x as i32 + self.sym_occs_win as i32 - 1;
         let starty = y as i32 - self.sym_occs_win as i32 + 1;
-        for i in 0..self.grid_size {
+        for i in 0..self.sym_occs_win {
             let startx = startx - i as i32;
             let starty = starty + i as i32;
             winning_indices.clear();
-            for j in 0..self.grid_size {
+            for j in 0..self.sym_occs_win {
                 let tx = startx - j as i32;
                 let ty = starty + j as i32;
                 if tx >= 0 && ty >= 0 && self.get_symbol(tx as usize, ty as usize) == self.get_symbol(x, y) {
@@ -148,7 +148,7 @@ impl Grid {
         None
     }
 
-    fn get_winner(&self) -> (GameStatus, Option<Vec<(usize, usize)>>) {
+    pub fn get_winner(&self) -> (GameStatus, Option<Vec<(usize, usize)>>) {
         let (x, y) = self.last_move;
         let sym = self.get_symbol(x, y);
         let funcs = [Self::check_cols, Self::check_diag, Self::check_diag_rev, Self::check_line];
@@ -197,8 +197,6 @@ pub struct DrawableGrid {
     grid_sprites: [RcSprite; 3],
     cells_offset: f32,
     cell_size: Vector2f,
-    players_symbols: [Symbol; 2],
-    current_symbol: usize,
     should_draw_sprites: bool,
     dimensions: Vector2f,
     position: Vector2f,
@@ -225,8 +223,6 @@ impl DrawableGrid {
             grid: Grid::new(grid_size, sym_occs_win),
             grid_sprites,
             cells_offset,
-            players_symbols: [Symbol::X, Symbol::O],
-            current_symbol: 0,
             cell_size: Vector2f::default(),
             should_draw_sprites: true,
             dimensions: dimensions.into(),
@@ -235,6 +231,14 @@ impl DrawableGrid {
             draw_line: false,
             position: Default::default()
         }
+    }
+
+    pub fn is_empty(&self, x: usize, y: usize) -> bool {
+        self.grid.is_empty(x, y)
+    }
+
+    pub fn clear_cell(&mut self, x: usize, y: usize) {
+        self.grid.set_symbol(x, y, Symbol::Empty);
     }
 
     pub fn get_winner(&mut self) -> GameStatus {
@@ -249,10 +253,9 @@ impl DrawableGrid {
         self.grid.grid_size
     }
 
-    pub fn put_symbol(&mut self, x: usize, y: usize) -> bool {
+    pub fn put_symbol(&mut self, x: usize, y: usize, symbol: Symbol) -> bool {
         if self.grid.is_empty(x, y) {
-            self.grid.set_symbol(x, y, self.players_symbols[self.current_symbol]);
-            self.current_symbol = (self.current_symbol + 1) % 2;
+            self.grid.set_symbol(x, y, symbol);
             self.should_draw_sprites = true;
 
             return true;
@@ -295,7 +298,7 @@ impl DrawableGrid {
         self.draw_line = true;
     }
 
-    pub fn on_mouse_click(&mut self, x: f32, y: f32) -> bool {
+    pub fn on_mouse_click(&mut self, x: f32, y: f32, symbol: Symbol) -> bool {
         let pos = Vector2f::new(x, y);
         let half_offset = self.cells_offset / 2.0;
 
@@ -313,7 +316,7 @@ impl DrawableGrid {
 
         let grid_pos = grid_pos.as_other::<usize>();
 
-        self.put_symbol(grid_pos.x, grid_pos.y)
+        self.put_symbol(grid_pos.x, grid_pos.y, symbol)
     }
 
     pub fn draw(&mut self, target: &mut dyn RenderTarget) {

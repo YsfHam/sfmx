@@ -20,8 +20,9 @@ fn main() {
 
     let mut app_data = AppData::default();
     app_data.win_size = (600, 600);
-    app_data.frame_rate = 30;
+    app_data.frame_rate = 60;
     app_data.win_style = Style::TITLEBAR | Style::CLOSE;
+    app_data.title = "Tic-Tac-Toe";
 
     let init_data = GameData { 
         clear_color: Color::rgb(245,245,250),
