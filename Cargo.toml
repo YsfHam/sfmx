@@ -2,7 +2,8 @@
 members = [
     "sfmx",
     "sandbox",
-    "tic_tac_toe"
+    "tic_tac_toe",
+    "chip8_interpreter"
 ]
 
 [profile.dev]
